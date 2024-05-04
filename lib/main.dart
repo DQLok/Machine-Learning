@@ -1,8 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:machine_learning/view/barcode.dart';
-import 'package:machine_learning/view/process_camera.dart';
-import 'package:machine_learning/view/select_picture.dart';
+import 'package:machine_learning/view/text/scan_text_gg.dart';
 
 late List<CameraDescription> _cameras;
 
@@ -23,9 +21,11 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: Barcode()
-        // ProcessCamera(cameras: _cameras)
-        //ProcessCamera(cameras: _cameras),
-        );
+        home:
+            //  Barcode()
+            // ProcessCamera(cameras: _cameras),
+            //ProcessCamera(cameras: _cameras),
+            // ScanDoc()
+            const ScanTextGg());
   }
 }

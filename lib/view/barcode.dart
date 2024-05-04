@@ -1,3 +1,5 @@
+// ignore_for_file: constant_pattern_never_matches_value_type
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';

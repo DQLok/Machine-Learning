@@ -54,7 +54,7 @@ class _ProcessCameraState extends State<ProcessCamera> {
     final List<ImageLabel> labels = await imageLabeler.processImage(inputImg);
     for (ImageLabel label in labels) {
       final String text = label.label;
-      final int index = label.index;
+      // final int index = label.index;
       final double confidence = label.confidence;
       result += "$text   ${confidence.toStringAsFixed(2)}\n";
     }
