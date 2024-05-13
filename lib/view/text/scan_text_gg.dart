@@ -53,7 +53,59 @@ class _ScanTextGgState extends State<ScanTextGg> {
                     ),
               blocks.isEmpty
                   ? const SizedBox()
-                  : Text(blocks.first.lines.first.boundingBox.toString())
+                  : Text(blocks.first.lines.first.boundingBox.toString()),
+              blocks.isEmpty
+                  ? const SizedBox()
+                  : Column(
+                      children: List.generate(
+                          blocks.length,
+                          (index) => Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(index.toString() +
+                                      ":" +
+                                      blocks.elementAt(index).lines.first.text),
+                                  Text(blocks
+                                      .elementAt(index)
+                                      .lines
+                                      .first
+                                      .elements
+                                      .first
+                                      .symbols
+                                      .first
+                                      .text),
+                                  Container(
+                                    alignment: Alignment.bottomRight,
+                                    child: Text(blocks
+                                            .elementAt(index)
+                                            .lines
+                                            .first
+                                            .elements
+                                            .first
+                                            .symbols
+                                            .first
+                                            .cornerPoints
+                                            .last
+                                            .x
+                                            .toString() +
+                                        "-" +
+                                        blocks
+                                            .elementAt(index)
+                                            .lines
+                                            .first
+                                            .elements
+                                            .first
+                                            .symbols
+                                            .first
+                                            .cornerPoints
+                                            .last
+                                            .y
+                                            .toString()),
+                                  ),
+                                ],
+                              )),
+                    ),
             ],
           ),
         ),

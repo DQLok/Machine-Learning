@@ -65,7 +65,9 @@ class _GalleryViewState extends State<GalleryView> {
   Widget _galleryBody() {
     return ListView(shrinkWrap: true, children: [
       _image != null
-          ? SizedBox(
+          ? Container(
+              decoration:
+                  BoxDecoration(border: Border.all(color: Colors.amber)),
               height: 400,
               width: 400,
               child: Stack(
