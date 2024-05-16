@@ -74,6 +74,14 @@ class _GalleryViewState extends State<GalleryView> {
                 fit: StackFit.expand,
                 children: <Widget>[
                   Image.file(_image!),
+                  Positioned(
+                      left: 348,
+                      top: 171,
+                      child: Container(
+                        height: 10,
+                        width: 10,
+                        color: Colors.red,
+                      ))
                 ],
               ),
             )

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -20,6 +22,16 @@ class _ScanTextGgState extends State<ScanTextGg> {
   String? _text;
   List<TextBlock> blocks = [];
   var _cameraLensDirection = CameraLensDirection.back;
+  //point
+  List<Point> listPoint = [];
+  List<Point> listCornerBlock = [];
+  List<int> leftRight = [];
+  Map<String, String> keyss = {};
+  Map<String, String> valuess = {};
+  Map<String, Map<String, String>> mapKeyValue = {};
+  Map<String, String> infors = {};
+  int difference = 15;
+  Map<String, Map<Map<String, String>, bool>> finalFilter = {};
 
   @override
   void dispose() async {
@@ -44,67 +56,252 @@ class _ScanTextGgState extends State<ScanTextGg> {
               blocks.isEmpty
                   ? const SizedBox()
                   : Column(
-                      children: List.generate(
-                          blocks.first.cornerPoints.length,
-                          (index) => Text(blocks.first.cornerPoints
-                              .elementAt(index)
-                              .x
-                              .toString())),
-                    ),
-              blocks.isEmpty
-                  ? const SizedBox()
-                  : Text(blocks.first.lines.first.boundingBox.toString()),
-              blocks.isEmpty
-                  ? const SizedBox()
-                  : Column(
-                      children: List.generate(
-                          blocks.length,
-                          (index) => Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(index.toString() +
-                                      ":" +
-                                      blocks.elementAt(index).lines.first.text),
-                                  Text(blocks
-                                      .elementAt(index)
-                                      .lines
-                                      .first
-                                      .elements
-                                      .first
-                                      .symbols
-                                      .first
-                                      .text),
-                                  Container(
-                                    alignment: Alignment.bottomRight,
-                                    child: Text(blocks
-                                            .elementAt(index)
-                                            .lines
-                                            .first
-                                            .elements
-                                            .first
-                                            .symbols
-                                            .first
-                                            .cornerPoints
-                                            .last
-                                            .x
-                                            .toString() +
-                                        "-" +
-                                        blocks
-                                            .elementAt(index)
-                                            .lines
-                                            .first
-                                            .elements
-                                            .first
-                                            .symbols
-                                            .first
-                                            .cornerPoints
-                                            .last
-                                            .y
-                                            .toString()),
-                                  ),
-                                ],
-                              )),
+                      children: [
+                        Column(
+                          children: List.generate(
+                              blocks.length,
+                              (index) => Container(
+                                    decoration: const BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                color: Colors.blue))),
+                                    child: formatBlocks(
+                                        index,
+                                        blocks.elementAt(index).cornerPoints,
+                                        blocks.elementAt(index).text),
+                                  )),
+                        ),
+                        Container(
+                            margin: const EdgeInsets.symmetric(vertical: 10),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("left - index: ${leftRight.first}"),
+                                    Text(listPoint.first.toString())
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                        "top - index: ${leftRight.elementAt(2)}"),
+                                    Text(listPoint.elementAt(2).toString())
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                        "right - index: ${leftRight.elementAt(1)}"),
+                                    Text(listPoint.elementAt(1).toString())
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("bottom - index: ${leftRight.last}"),
+                                    Text(listPoint.last.toString())
+                                  ],
+                                )
+                              ],
+                            )),
+                        Container(
+                          margin: const EdgeInsets.all(5),
+                          alignment: Alignment.centerLeft,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: List.generate(
+                                keyss.length,
+                                (index) => Row(
+                                      children: [
+                                        Container(
+                                          margin: const EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Colors.blueAccent)),
+                                          child: Text(
+                                            keyss.keys.elementAt(index),
+                                          ),
+                                        ),
+                                        Container(
+                                          margin: const EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: Colors.blueAccent)),
+                                          child: Text(
+                                            keyss.values.elementAt(index),
+                                          ),
+                                        ),
+                                      ],
+                                    )),
+                          ),
+                        ),
+                        const Divider(),
+                        Container(
+                          margin: const EdgeInsets.all(5),
+                          child: Column(
+                            children: List.generate(
+                                valuess.length,
+                                (index) => Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Container(
+                                            margin: const EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.blueAccent)),
+                                            child: Text(
+                                                valuess.keys.elementAt(index))),
+                                        Container(
+                                            margin: const EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.blueAccent)),
+                                            child: Text(valuess.values
+                                                .elementAt(index))),
+                                      ],
+                                    )),
+                          ),
+                        ),
+                        const Divider(),
+                        Container(
+                          margin: const EdgeInsets.all(5),
+                          alignment: Alignment.centerRight,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: List.generate(
+                                infors.length,
+                                (index) => Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                            margin: const EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.blueAccent)),
+                                            child: Text(
+                                                infors.keys.elementAt(index))),
+                                        Container(
+                                            margin: const EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.blueAccent)),
+                                            child: Text(infors.values
+                                                .elementAt(index))),
+                                      ],
+                                    )),
+                          ),
+                        ),
+                        const Divider(),
+                        Container(
+                          margin: const EdgeInsets.all(5),
+                          child: Column(
+                            children: List.generate(
+                                mapKeyValue.length,
+                                (index) => Row(
+                                      children: [
+                                        Container(
+                                            margin: const EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.blueAccent)),
+                                            child: Text(mapKeyValue.keys
+                                                .elementAt(index))),
+                                        Expanded(
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Container(
+                                                margin: const EdgeInsets.all(5),
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color:
+                                                            Colors.blueAccent)),
+                                                child: Text(mapKeyValue.values
+                                                    .elementAt(index)
+                                                    .keys
+                                                    .first),
+                                              ),
+                                              Container(
+                                                  margin:
+                                                      const EdgeInsets.all(5),
+                                                  decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: Colors
+                                                              .blueAccent)),
+                                                  child: Text(mapKeyValue.values
+                                                      .elementAt(index)
+                                                      .values
+                                                      .first)),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    )),
+                          ),
+                        ),
+                        const Divider(),
+                        Container(
+                          margin: const EdgeInsets.all(5),
+                          child: Column(
+                            children: List.generate(
+                                finalFilter.length,
+                                (index) => Row(
+                                      children: [
+                                        Container(
+                                            margin: const EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.blueAccent)),
+                                            child: Text(finalFilter.keys
+                                                .elementAt(index))),
+                                        Expanded(
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Container(
+                                                margin: const EdgeInsets.all(5),
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color:
+                                                            Colors.blueAccent)),
+                                                child: Text(finalFilter.values
+                                                    .elementAt(index)
+                                                    .keys
+                                                    .first
+                                                    .keys
+                                                    .first),
+                                              ),
+                                              Container(
+                                                margin: const EdgeInsets.all(5),
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color:
+                                                            Colors.blueAccent)),
+                                                child: Text(finalFilter.values
+                                                    .elementAt(index)
+                                                    .keys
+                                                    .first
+                                                    .values
+                                                    .first),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    )),
+                          ),
+                        ),
+                      ],
                     ),
             ],
           ),
@@ -182,12 +379,297 @@ class _ScanTextGgState extends State<ScanTextGg> {
       _customPaint = CustomPaint(painter: painter);
     } else {
       blocks = recognizedText.blocks;
-      _text = 'Recognized text:\n\n${recognizedText.text}';
+      _text = 'Recognized text:\n\n${/*recognizedText.text*/ "---"}';
       _customPaint = null;
+      processBlocks();
     }
     _isBusy = false;
     if (mounted) {
       setState(() {});
     }
+  }
+
+  void processBlocks() {
+    if (blocks.isNotEmpty) {
+      //----lấy 4 góc mặc định block---
+      listCornerBlock.clear();
+      listCornerBlock.add(Point(blocks.first.cornerPoints.first.x,
+          blocks.first.cornerPoints.first.y));
+      listCornerBlock.add(Point(blocks.first.cornerPoints.elementAt(1).x,
+          blocks.first.cornerPoints.elementAt(1).y));
+      listCornerBlock.add(Point(blocks.last.cornerPoints.elementAt(2).x,
+          blocks.last.cornerPoints.elementAt(2).y));
+      listCornerBlock.add(Point(
+          blocks.last.cornerPoints.last.x, blocks.last.cornerPoints.last.y));
+      //-------check lại 4 góc---------
+      leftRight.clear();
+      leftRight.addAll([0, 0, 0, 0]);
+      Point minPointLeft = listCornerBlock.first;
+      Point maxPointRight = listCornerBlock.elementAt(1);
+      Point minPointTop = listCornerBlock.first;
+      Point maxPointBottom = listCornerBlock.last;
+      for (var i = 0; i < blocks.length; i++) {
+        Point tmpL = comparePointLeft(
+            minPointLeft,
+            blocks.elementAt(i).cornerPoints.first,
+            blocks.elementAt(i).cornerPoints.last);
+        Point tmpR = comparePointRight(
+            maxPointRight,
+            blocks.elementAt(i).cornerPoints.elementAt(1),
+            blocks.elementAt(i).cornerPoints.elementAt(2));
+        Point tmpT = comparePointTop(
+            minPointTop,
+            blocks.elementAt(i).cornerPoints.first,
+            blocks.elementAt(i).cornerPoints.elementAt(1));
+        Point tmpB = comparePointBottom(
+            maxPointBottom,
+            blocks.elementAt(i).cornerPoints.last,
+            blocks.elementAt(i).cornerPoints.elementAt(2));
+        if (checkPoint(tmpL, blocks.elementAt(i).cornerPoints.first,
+            blocks.elementAt(i).cornerPoints.last)) {
+          leftRight[0] = i;
+          minPointLeft = tmpL;
+        }
+        if (checkPoint(tmpR, blocks.elementAt(i).cornerPoints.elementAt(1),
+            blocks.elementAt(i).cornerPoints.elementAt(2))) {
+          leftRight[1] = i;
+          maxPointRight = tmpR;
+        }
+        if (checkPoint(tmpT, blocks.elementAt(i).cornerPoints.first,
+            blocks.elementAt(i).cornerPoints.elementAt(1))) {
+          leftRight[2] = i;
+          minPointTop = tmpT;
+        }
+        if (checkPoint(tmpB, blocks.elementAt(i).cornerPoints.last,
+            blocks.elementAt(i).cornerPoints.elementAt(2))) {
+          leftRight[3] = i;
+          maxPointBottom = tmpB;
+        }
+      }
+      listPoint
+          .addAll([minPointLeft, maxPointRight, minPointTop, maxPointBottom]);
+      //-----------------
+      filterKeyValue();
+    }
+  }
+
+  //--check 4 góc---
+  Point comparePointLeft(Point pointDefault, Point point1, Point point2) {
+    Point point = pointDefault;
+    if (point.x >= point1.x) {
+      point = point1;
+    }
+    if (point.x >= point2.x) {
+      point = point2;
+    }
+    return point;
+  }
+
+  Point comparePointRight(Point pointDefault, Point point1, Point point2) {
+    Point point = pointDefault;
+    if (point.x <= point1.x) {
+      point = point1;
+    }
+    if (point.x <= point2.x) {
+      point = point2;
+    }
+    return point;
+  }
+
+  Point comparePointTop(Point pointDefault, Point point1, Point point2) {
+    Point point = pointDefault;
+    if (point.y >= point1.y) {
+      point = point1;
+    }
+    if (point.y >= point2.y) {
+      point = point2;
+    }
+    return point;
+  }
+
+  Point comparePointBottom(Point pointDefault, Point point1, Point point2) {
+    Point point = pointDefault;
+    if (point.y <= point1.y) {
+      point = point1;
+    }
+    if (point.y <= point2.y) {
+      point = point2;
+    }
+    return point;
+  }
+
+  bool checkPoint(Point pointDefault, Point point1, Point point2) {
+    return (pointDefault.x == point1.x && pointDefault.y == point1.y) ||
+            (pointDefault.x == point2.x && pointDefault.y == point2.y)
+        ? true
+        : false;
+  }
+  //-----------------------
+
+  //----chia key value độc lập ----
+  filterKeyValue() {
+    for (var i = 0; i < blocks.length; i++) {
+      int count = 0;
+      if (checkPointFilterLeft(
+          listPoint.first,
+          blocks.elementAt(i).cornerPoints.first,
+          blocks.elementAt(i).cornerPoints.last)) {
+        keyss.addAll({"$i": blocks.elementAt(i).text});
+        count++;
+      }
+      if (checkPointFilterRight(
+          listPoint.elementAt(1),
+          blocks.elementAt(i).cornerPoints.elementAt(1),
+          blocks.elementAt(i).cornerPoints.elementAt(2))) {
+        valuess.addAll({"$i": blocks.elementAt(i).text});
+        count++;
+      }
+      if (count == 0) {
+        infors.addAll({"$i": blocks.elementAt(i).text});
+      }
+      if (count == 2) {
+        infors.addAll({"$i": blocks.elementAt(i).text});
+        if (keyss.isNotEmpty) {
+          keyss.remove(keyss.keys.elementAt(keyss.length - 1));
+        }
+        if (valuess.isNotEmpty) {
+          valuess.remove(valuess.keys.elementAt(valuess.length - 1));
+        }
+      }
+    }
+    getKeyValue();
+  }
+
+  bool checkPointFilterLeft(Point pointDefault, Point point1, Point point2) {
+    return point1.x - pointDefault.x <= difference ||
+            point2.x - pointDefault.x <= difference
+        ? true
+        : false;
+  }
+
+  bool checkPointFilterRight(Point pointDefault, Point point1, Point point2) {
+    return pointDefault.x - point1.x <= difference ||
+            pointDefault.x - point2.x <= difference
+        ? true
+        : false;
+  }
+  //---------------
+
+  //-----gọp key value----
+  getKeyValue() {
+    mapKeyValue.clear();
+    if (keyss.length > valuess.length) {
+      for (var i = 0; i < keyss.keys.length; i++) {
+        int indexK = int.parse(keyss.keys.elementAt(i));
+        String childKey = keyss.values.elementAt(i);
+        String childValue = "";
+        for (var j = 0; j < valuess.keys.length; j++) {
+          int indexV = int.parse(valuess.keys.elementAt(j));
+          if (checkKeyvalue(blocks.elementAt(indexK).cornerPoints,
+              blocks.elementAt(indexV).cornerPoints)) {
+            if (keyss.values.elementAt(i) != valuess.values.elementAt(j)) {
+              childValue = valuess.values.elementAt(j);
+            }
+          }
+        }
+        mapKeyValue.addAll({
+          "$indexK": {childKey: childValue}
+        });
+      }
+      //---kiểm tra value dư--
+      // if (valuess.length > listValueOk.length) {
+      //   List<String> val = valuess.keys
+      //       .where((element) => !listValueOk.contains(element))
+      //       .toList();
+      //   if (val.isNotEmpty) {
+      //     for (var element in val) {
+      //       mapKeyValue.addAll({
+      //         element: {
+      //           blocks.elementAt(int.parse(element)).text:
+      //               blocks.elementAt(int.parse(element)).text
+      //         }
+      //       });
+      //     }
+      //   }
+      // }
+    }
+    //--------------------
+    insertInfor();
+  }
+
+  bool checkKeyvalue(List<Point<int>> point1, List<Point<int>> point2) {
+    return (point1.elementAt(1).y - point2.first.y).abs() < difference ||
+        (point1.elementAt(2).y - point2.last.y).abs() < difference;
+  }
+  //--------------------
+
+  //---chèn đầy đủ thông tin----
+  insertInfor() {
+    finalFilter.clear();
+    for (var i = 0; i < blocks.length; i++) {
+      int indexKeyValue =
+          // int.parse(mapKeyValue.keys.firstWhere
+          //     ((element) => element == "$i", orElse: () => "-1"));
+          getIndex(mapKeyValue.keys.toList(growable: false), i);
+      if (indexKeyValue != -1) {
+        finalFilter.addAll({
+          "$i": {mapKeyValue.values.elementAt(indexKeyValue): false}
+        });
+      }
+      int indexInfor =
+          // int.parse(infors.keys
+          //     .firstWhere((element) => element == "$i", orElse: () => "-1"));
+          getIndex(infors.keys.toList(growable: false), i);
+      if (indexInfor != -1) {
+        finalFilter.addAll({
+          "$i": {
+            {infors.values.elementAt(indexInfor): ""}: true
+          }
+        });
+      }
+    }
+    print("----------------------------------");
+    print(finalFilter.length);
+  }
+
+  //--------------------------
+  int getIndex(List<String> list, int index) {
+    // ignore: unrelated_type_equality_checks
+    return list.indexWhere((element) => element == "$index");
+  }
+
+  //-------------
+  Widget formatBlocks(int index, List<Point<int>> cornerPoints, String text) {
+    return Row(
+      children: [
+        Text("$index: "),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(cornerPoints.first.toString()),
+                  Text(cornerPoints.elementAt(1).toString()),
+                ],
+              ),
+              Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blueAccent)),
+                  child: Text(text)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(cornerPoints.last.toString()),
+                  Text(cornerPoints.elementAt(2).toString())
+                ],
+              ),
+            ],
+          ),
+        )
+      ],
+    );
   }
 }
