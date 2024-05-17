@@ -1,7 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:machine_learning/view/text/scan_text_gg.dart';
-import 'package:machine_learning/view/webhook/webhook.dart';
 
 late List<CameraDescription> _cameras;
 

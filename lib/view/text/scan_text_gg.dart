@@ -522,6 +522,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
     _isBusy = true;
     setState(() {
       _text = '';
+      clearAll();
     });
     final recognizedText = await _textRecognizer.processImage(inputImage);
     if (inputImage.metadata?.size != null &&
@@ -543,6 +544,24 @@ class _ScanTextGgState extends State<ScanTextGg> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  clearAll() {
+    blocks.clear();
+    listPoint.clear();
+    listCornerBlock.clear();
+    leftRight.clear();
+    keyss.clear();
+    valuess.clear();
+    mapKeyValue.clear();
+    mapKeyValueInfor.clear();
+    infors.clear();
+    onlyValue.clear();
+    finalFilter.clear();
+    //-----------------
+    listTextGroupBlocks.clear();
+    listStandardAngle.clear();
+    listKeyValues.clear();
   }
 
   void processBlocks() {
