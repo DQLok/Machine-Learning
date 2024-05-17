@@ -29,8 +29,10 @@ class _ScanTextGgState extends State<ScanTextGg> {
   Map<String, String> keyss = {};
   Map<String, String> valuess = {};
   Map<String, Map<String, String>> mapKeyValue = {};
+  Map<String, Map<String, String>> mapKeyValueInfor = {};
   Map<String, String> infors = {};
   int difference = 15;
+  Map<String, String> onlyValue = {};
   Map<String, Map<Map<String, String>, bool>> finalFilter = {};
 
   @override
@@ -57,6 +59,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                   ? const SizedBox()
                   : Column(
                       children: [
+                        Text("infor blocks"),
                         Column(
                           children: List.generate(
                               blocks.length,
@@ -71,6 +74,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                                         blocks.elementAt(index).text),
                                   )),
                         ),
+                        Text("filter cornerPoints blocks"),
                         Container(
                             margin: const EdgeInsets.symmetric(vertical: 10),
                             child: Column(
@@ -111,6 +115,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                                 )
                               ],
                             )),
+                        Text("keys blocks - left"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           alignment: Alignment.centerLeft,
@@ -143,6 +148,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                           ),
                         ),
                         const Divider(),
+                        Text("values blocks - right"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           child: Column(
@@ -170,6 +176,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                           ),
                         ),
                         const Divider(),
+                        Text("information blocks - center"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           alignment: Alignment.centerRight,
@@ -200,6 +207,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                           ),
                         ),
                         const Divider(),
+                        Text("Match keys and values blocks"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           child: Column(
@@ -249,6 +257,90 @@ class _ScanTextGgState extends State<ScanTextGg> {
                           ),
                         ),
                         const Divider(),
+                        Text("Values > keys blocks"),
+                        Container(
+                          margin: const EdgeInsets.all(5),
+                          alignment: Alignment.centerRight,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: List.generate(
+                                onlyValue.length,
+                                (index) => Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                            margin: const EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.blueAccent)),
+                                            child: Text(onlyValue.keys
+                                                .elementAt(index))),
+                                        Container(
+                                            margin: const EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.blueAccent)),
+                                            child: Text(onlyValue.values
+                                                .elementAt(index))),
+                                      ],
+                                    )),
+                          ),
+                        ),
+                        const Divider(),
+                        Text("Match information and values blocks"),
+                        Container(
+                          margin: const EdgeInsets.all(5),
+                          child: Column(
+                            children: List.generate(
+                                mapKeyValueInfor.length,
+                                (index) => Row(
+                                      children: [
+                                        Container(
+                                            margin: const EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.blueAccent)),
+                                            child: Text(mapKeyValueInfor.keys
+                                                .elementAt(index))),
+                                        Expanded(
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Container(
+                                                margin: const EdgeInsets.all(5),
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color:
+                                                            Colors.blueAccent)),
+                                                child: Text(mapKeyValueInfor
+                                                    .values
+                                                    .elementAt(index)
+                                                    .keys
+                                                    .first),
+                                              ),
+                                              Container(
+                                                  margin:
+                                                      const EdgeInsets.all(5),
+                                                  decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          color: Colors
+                                                              .blueAccent)),
+                                                  child: Text(mapKeyValueInfor
+                                                      .values
+                                                      .elementAt(index)
+                                                      .values
+                                                      .first)),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    )),
+                          ),
+                        ),
+                        const Divider(),
+                        Text("FINAL"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           child: Column(
@@ -391,6 +483,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
 
   void processBlocks() {
     if (blocks.isNotEmpty) {
+      filterBlocks();
       //----lấy 4 góc mặc định block---
       listCornerBlock.clear();
       listCornerBlock.add(Point(blocks.first.cornerPoints.first.x,
@@ -448,8 +541,10 @@ class _ScanTextGgState extends State<ScanTextGg> {
       }
       listPoint
           .addAll([minPointLeft, maxPointRight, minPointTop, maxPointBottom]);
-      //-----------------
+      //------cach1-----------
       filterKeyValue();
+      //-------------------
+      // filterBlocks();
     }
   }
 
@@ -505,6 +600,12 @@ class _ScanTextGgState extends State<ScanTextGg> {
         : false;
   }
   //-----------------------
+
+  filterBlocks() {
+    blocks.sort(
+      (a, b) => a.cornerPoints.first.y.compareTo(b.cornerPoints.first.y),
+    );
+  }
 
   //----chia key value độc lập ----
   filterKeyValue() {
@@ -576,22 +677,15 @@ class _ScanTextGgState extends State<ScanTextGg> {
           "$indexK": {childKey: childValue}
         });
       }
-      //---kiểm tra value dư--
-      // if (valuess.length > listValueOk.length) {
-      //   List<String> val = valuess.keys
-      //       .where((element) => !listValueOk.contains(element))
-      //       .toList();
-      //   if (val.isNotEmpty) {
-      //     for (var element in val) {
-      //       mapKeyValue.addAll({
-      //         element: {
-      //           blocks.elementAt(int.parse(element)).text:
-      //               blocks.elementAt(int.parse(element)).text
-      //         }
-      //       });
-      //     }
-      //   }
-      // }
+      //--kiểm tra key rỗng
+      onlyValue.clear();
+      valuess.forEach((key, value) {
+        if (!mapKeyValue.values
+            .any((element) => element.values.first == value)) {
+          onlyValue.addAll({key: value});
+        }
+      });
+      getKeyValueWithInfor();
     }
     //--------------------
     insertInfor();
@@ -603,33 +697,55 @@ class _ScanTextGgState extends State<ScanTextGg> {
   }
   //--------------------
 
+  getKeyValueWithInfor() {
+    mapKeyValueInfor.clear();
+    if (infors.length > onlyValue.length) {
+      for (var i = 0; i < infors.keys.length; i++) {
+        int indexK = int.parse(infors.keys.elementAt(i));
+        String childKey = infors.values.elementAt(i);
+        String childValue = "";
+        for (var j = 0; j < onlyValue.keys.length; j++) {
+          int indexV = int.parse(onlyValue.keys.elementAt(j));
+          if (checkKeyvalue(blocks.elementAt(indexK).cornerPoints,
+              blocks.elementAt(indexV).cornerPoints)) {
+            if (keyss.values.elementAt(i) != onlyValue.values.elementAt(j)) {
+              childValue = onlyValue.values.elementAt(j);
+            }
+          }
+        }
+        mapKeyValueInfor.addAll({
+          "$indexK": {childKey: childValue}
+        });
+      }
+    }
+  }
+
   //---chèn đầy đủ thông tin----
   insertInfor() {
     finalFilter.clear();
     for (var i = 0; i < blocks.length; i++) {
-      int indexKeyValue =
-          // int.parse(mapKeyValue.keys.firstWhere
-          //     ((element) => element == "$i", orElse: () => "-1"));
-          getIndex(mapKeyValue.keys.toList(growable: false), i);
+      int indexKeyValue = getIndex(mapKeyValue.keys.toList(growable: false), i);
       if (indexKeyValue != -1) {
         finalFilter.addAll({
           "$i": {mapKeyValue.values.elementAt(indexKeyValue): false}
         });
       }
-      int indexInfor =
-          // int.parse(infors.keys
-          //     .firstWhere((element) => element == "$i", orElse: () => "-1"));
-          getIndex(infors.keys.toList(growable: false), i);
-      if (indexInfor != -1) {
+      int indexKeyValueInfor =
+          getIndex(mapKeyValueInfor.keys.toList(growable: false), i);
+      if (indexKeyValueInfor != -1) {
         finalFilter.addAll({
-          "$i": {
-            {infors.values.elementAt(indexInfor): ""}: true
-          }
+          "$i": {mapKeyValueInfor.values.elementAt(indexKeyValueInfor): false}
         });
       }
+      // int indexInfor = getIndex(infors.keys.toList(growable: false), i);
+      // if (indexInfor != -1) {
+      //   finalFilter.addAll({
+      //     "$i": {
+      //       {infors.values.elementAt(indexInfor): ""}: true
+      //     }
+      //   });
+      // }
     }
-    print("----------------------------------");
-    print(finalFilter.length);
   }
 
   //--------------------------
