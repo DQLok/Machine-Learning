@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:machine_learning/view/text/objects/text_group.dart';
 import 'package:machine_learning/view/text/widgets/detector_view.dart';
 import 'package:machine_learning/view/text/widgets/text_detector_painter.dart';
 
@@ -34,6 +35,10 @@ class _ScanTextGgState extends State<ScanTextGg> {
   int difference = 15;
   Map<String, String> onlyValue = {};
   Map<String, Map<Map<String, String>, bool>> finalFilter = {};
+  //option2--------------------------------------
+  List<TextGroup> listTextGroupBlocks = [];
+  List<TextGroup> listStandardAngle = [];
+  List<KeyValueFilter> listKeyValues = [];
 
   @override
   void dispose() async {
@@ -59,7 +64,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                   ? const SizedBox()
                   : Column(
                       children: [
-                        Text("infor blocks"),
+                        const Text("infor blocks"),
                         Column(
                           children: List.generate(
                               blocks.length,
@@ -74,7 +79,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                                         blocks.elementAt(index).text),
                                   )),
                         ),
-                        Text("filter cornerPoints blocks"),
+                        const Text("filter cornerPoints blocks"),
                         Container(
                             margin: const EdgeInsets.symmetric(vertical: 10),
                             child: Column(
@@ -115,7 +120,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                                 )
                               ],
                             )),
-                        Text("keys blocks - left"),
+                        const Text("keys blocks - left"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           alignment: Alignment.centerLeft,
@@ -148,7 +153,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                           ),
                         ),
                         const Divider(),
-                        Text("values blocks - right"),
+                        const Text("values blocks - right"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           child: Column(
@@ -176,7 +181,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                           ),
                         ),
                         const Divider(),
-                        Text("information blocks - center"),
+                        const Text("information blocks - center"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           alignment: Alignment.centerRight,
@@ -207,7 +212,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                           ),
                         ),
                         const Divider(),
-                        Text("Match keys and values blocks"),
+                        const Text("Match keys and values blocks"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           child: Column(
@@ -257,7 +262,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                           ),
                         ),
                         const Divider(),
-                        Text("Values > keys blocks"),
+                        const Text("Values > keys blocks"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           alignment: Alignment.centerRight,
@@ -288,7 +293,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                           ),
                         ),
                         const Divider(),
-                        Text("Match information and values blocks"),
+                        const Text("Match information and values blocks"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           child: Column(
@@ -340,7 +345,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
                           ),
                         ),
                         const Divider(),
-                        Text("FINAL"),
+                        const Text("FINAL"),
                         Container(
                           margin: const EdgeInsets.all(5),
                           child: Column(
@@ -393,6 +398,65 @@ class _ScanTextGgState extends State<ScanTextGg> {
                                     )),
                           ),
                         ),
+                        const Divider(),
+                        const Text("option2"),
+                        Container(
+                          margin: const EdgeInsets.all(5),
+                          child: Column(
+                            children: List.generate(
+                                listKeyValues.length,
+                                (index) => Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        IntrinsicWidth(
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.blueAccent)),
+                                            child: Text(
+                                                "${listKeyValues.elementAt(index).keyTG.index}: ${listKeyValues.elementAt(index).keyTG.text}"),
+                                          ),
+                                        ),
+                                        listKeyValues
+                                                .elementAt(index)
+                                                .valueTG
+                                                .isEmpty
+                                            ? const SizedBox()
+                                            : Expanded(
+                                                flex: 1,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: List.generate(
+                                                      listKeyValues
+                                                          .elementAt(index)
+                                                          .valueTG
+                                                          .length,
+                                                      (indexChild) => Container(
+                                                            margin:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    left: 20),
+                                                            decoration: BoxDecoration(
+                                                                border: Border.all(
+                                                                    color: Colors
+                                                                        .blueAccent)),
+                                                            child: Text(
+                                                                listKeyValues
+                                                                    .elementAt(
+                                                                        index)
+                                                                    .valueTG
+                                                                    .elementAt(
+                                                                        indexChild)
+                                                                    .text),
+                                                          )),
+                                                ),
+                                              ),
+                                      ],
+                                    )),
+                          ),
+                        )
                       ],
                     ),
             ],
@@ -484,8 +548,15 @@ class _ScanTextGgState extends State<ScanTextGg> {
   void processBlocks() {
     if (blocks.isNotEmpty) {
       filterBlocks();
+      //-------------------------------------OPTION 1--------------------------------------
       //----lấy 4 góc mặc định block---
       listCornerBlock.clear();
+      // listCornerBlock = [
+      //   listTextGroupBlocks.first.conrnerPoints.pointLT, //left-top
+      //   listTextGroupBlocks.first.conrnerPoints.pointRT, //right-top
+      //   listTextGroupBlocks.first.conrnerPoints.pointRB, //right-bottom
+      //   listTextGroupBlocks.first.conrnerPoints.pointLB //left-bottom
+      // ];
       listCornerBlock.add(Point(blocks.first.cornerPoints.first.x,
           blocks.first.cornerPoints.first.y));
       listCornerBlock.add(Point(blocks.first.cornerPoints.elementAt(1).x,
@@ -501,6 +572,7 @@ class _ScanTextGgState extends State<ScanTextGg> {
       Point maxPointRight = listCornerBlock.elementAt(1);
       Point minPointTop = listCornerBlock.first;
       Point maxPointBottom = listCornerBlock.last;
+
       for (var i = 0; i < blocks.length; i++) {
         Point tmpL = comparePointLeft(
             minPointLeft,
@@ -541,10 +613,9 @@ class _ScanTextGgState extends State<ScanTextGg> {
       }
       listPoint
           .addAll([minPointLeft, maxPointRight, minPointTop, maxPointBottom]);
-      //------cach1-----------
       filterKeyValue();
-      //-------------------
-      // filterBlocks();
+      //---------------------option2-------------------------
+      processOption2();
     }
   }
 
@@ -605,6 +676,17 @@ class _ScanTextGgState extends State<ScanTextGg> {
     blocks.sort(
       (a, b) => a.cornerPoints.first.y.compareTo(b.cornerPoints.first.y),
     );
+    for (var i = 0; i < blocks.length; i++) {
+      List<Point<int>> list = blocks.elementAt(i).cornerPoints;
+      listTextGroupBlocks.add(TextGroup(
+          index: "$i",
+          conrnerPoints: ConrnerPoints(
+              pointLT: list.first,
+              pointRT: list.elementAt(1),
+              pointRB: list.elementAt(2),
+              pointLB: list.last),
+          text: blocks.elementAt(i).text));
+    }
   }
 
   //----chia key value độc lập ----
@@ -753,6 +835,119 @@ class _ScanTextGgState extends State<ScanTextGg> {
     // ignore: unrelated_type_equality_checks
     return list.indexWhere((element) => element == "$index");
   }
+
+  //------------------------Option 2-----------------------------------------
+  processOption2() {
+    //---Step1: get 4 corner----
+    TextGroup pointL = listTextGroupBlocks.reduce((value, element) => value
+                    .conrnerPoints.pointLT.x <
+                element.conrnerPoints.pointLT.x ||
+            value.conrnerPoints.pointLT.x < element.conrnerPoints.pointLB.x ||
+            value.conrnerPoints.pointLB.x < element.conrnerPoints.pointLT.x ||
+            value.conrnerPoints.pointLB.x < element.conrnerPoints.pointLB.x
+        ? value
+        : element);
+    TextGroup pointR = listTextGroupBlocks.reduce((value, element) => value
+                    .conrnerPoints.pointRT.x >
+                element.conrnerPoints.pointRT.x ||
+            value.conrnerPoints.pointRT.x > element.conrnerPoints.pointRB.x ||
+            value.conrnerPoints.pointRB.x > element.conrnerPoints.pointRT.x ||
+            value.conrnerPoints.pointRB.x > element.conrnerPoints.pointRB.x
+        ? value
+        : element);
+    TextGroup pointT = listTextGroupBlocks.reduce((value, element) => value
+                    .conrnerPoints.pointLT.y <
+                element.conrnerPoints.pointLT.y ||
+            value.conrnerPoints.pointLT.y < element.conrnerPoints.pointRT.y ||
+            value.conrnerPoints.pointRT.y < element.conrnerPoints.pointLT.y ||
+            value.conrnerPoints.pointRT.y < element.conrnerPoints.pointRT.y
+        ? value
+        : element);
+    TextGroup pointB = listTextGroupBlocks.reduce((value, element) => value
+                    .conrnerPoints.pointLB.y >
+                element.conrnerPoints.pointLB.y ||
+            value.conrnerPoints.pointLB.y > element.conrnerPoints.pointRB.y ||
+            value.conrnerPoints.pointRB.y > element.conrnerPoints.pointLB.y ||
+            value.conrnerPoints.pointRB.y > element.conrnerPoints.pointRB.y
+        ? value
+        : element);
+    listStandardAngle.addAll([pointL, pointR, pointT, pointB]);
+
+    //---Step2: get key min left-top and create list key(not empty)-value(empty)------
+    List<TextGroup> listKeys = listTextGroupBlocks
+        .where((element) =>
+            element.conrnerPoints.pointLT.x -
+                    listStandardAngle.first.conrnerPoints.pointLT.x <=
+                10 ||
+            element.conrnerPoints.pointLB.x -
+                    listStandardAngle.first.conrnerPoints.pointLT.x <=
+                10)
+        .toList();
+    for (var element in listKeys) {
+      listKeyValues.add(KeyValueFilter(keyTG: element, valueTG: []));
+    }
+
+    //---Step3: delete list key in default list-----
+    List<TextGroup> listFilterValueInfors = List.from(listTextGroupBlocks);
+    listFilterValueInfors.removeWhere(
+        (element) => listKeys.any((el) => el.index == element.index));
+    //---coppy list value & infor----
+    List<TextGroup> listFilterInfors = List.from(listFilterValueInfors);
+
+    //---Step4: add value with key----
+    for (int i = 0; i < listKeyValues.length; i++) {
+      KeyValueFilter key = listKeyValues.elementAt(i);
+      List<TextGroup> values = getValueWithKey(key, listFilterValueInfors);
+      listFilterInfors.removeWhere(
+          (element) => values.any((el) => el.index == element.index));
+      listKeyValues[i].valueTG = values;
+    }
+
+    //---Step5: list only information----
+    //---filter list information => key-value
+    List<List<TextGroup>> listKeyValueWithInfor = [];
+    while (listFilterInfors.isNotEmpty) {
+      List<TextGroup> listChild = [];
+      listChild.add(listFilterInfors.first);
+      List<TextGroup> values = getValueWithKey(
+          KeyValueFilter(keyTG: listChild.first, valueTG: []),
+          listFilterInfors);
+
+      listChild.addAll(values);
+      listChild.sort(
+        (a, b) =>
+            a.conrnerPoints.pointLT.x.compareTo(b.conrnerPoints.pointLT.x),
+      );
+
+      listFilterInfors
+          .removeWhere((el) => listChild.any((el1) => el1.index == el.index));
+
+      listKeyValueWithInfor.add(listChild);
+    }
+    for (var element in listKeyValueWithInfor) {
+      listKeyValues.add(
+          KeyValueFilter(keyTG: element.first, valueTG: element.sublist(1)));
+    }
+
+    //---Step6: final scan----
+    listKeyValues.sort(
+      (a, b) => int.parse(a.keyTG.index).compareTo(int.parse(b.keyTG.index)),
+    );
+  }
+
+  List<TextGroup> getValueWithKey(KeyValueFilter key, List<TextGroup> values) {
+    return values
+        .where((el) =>
+            key.keyTG.index != el.index &&
+            ((key.keyTG.conrnerPoints.pointRT.y - el.conrnerPoints.pointRT.y)
+                        .abs() <
+                    10 ||
+                (key.keyTG.conrnerPoints.pointRB.y - el.conrnerPoints.pointRB.y)
+                        .abs() <
+                    10))
+        .toList();
+  }
+  //-------------------------------------------------------------------------
 
   //-------------
   Widget formatBlocks(int index, List<Point<int>> cornerPoints, String text) {
