@@ -98,7 +98,7 @@ class _SelectPictureState extends State<SelectPicture> {
                           Center(
                             child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    primary: Colors.transparent,
+                                    backgroundColor: Colors.transparent,
                                     shadowColor: Colors.transparent),
                                 onPressed: chooseImages,
                                 onLongPress: captureImages,

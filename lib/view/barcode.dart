@@ -107,7 +107,7 @@ class _BarcodeState extends State<Barcode> {
                     Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            primary: Colors.transparent,
+                            backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent),
                         onPressed: _imgFromGallery,
                         onLongPress: _imgFromCamera,
